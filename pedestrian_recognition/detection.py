@@ -7,7 +7,7 @@ from ultralytics import YOLO
 model = YOLO("yolov8n.pt")
 
 # Imput path
-video_name = "video_1280x720.mp4"
+video_name = "meritev_1682262004_002.mp4"
 video_folder = "no_audio"
 video_path = os.path.join(video_folder, video_name)
 
