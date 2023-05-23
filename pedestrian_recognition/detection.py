@@ -9,7 +9,7 @@ import math
 model = YOLO("yolov8n.pt")
 
 # Imput path
-video_name = "meritev_1682262004_002.mp4"
+video_name = "video_1280x720.mp4"
 video_folder = "no_audio"
 video_path = os.path.join(video_folder, video_name)
 
@@ -30,8 +30,11 @@ width_factor = width / detection_width
 height_factor = height / detection_height
 
 # Set output video properties
+# output_width = 1280
+# output_height = 720
 output_width = width
 output_height = height
+
 
 # Output path
 output_video_name = "output_" + video_name
@@ -80,9 +83,6 @@ while True:
     # Write frame to output video
     output_video.write(frame)
     frame_count += 1
-    # cv2.imshow('Frame', frame)
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     break
 t.toc()
 
 # Release resources
