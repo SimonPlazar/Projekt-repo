@@ -3,13 +3,10 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/Output" />
-      <excludeFolder url="file://$MODULE_DIR$/Posnetki" />
+      <excludeFolder url="file://$MODULE_DIR$/Projekt" />
       <excludeFolder url="file://$MODULE_DIR$/no_audio" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.9 (Projekt)" jdkType="Python SDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-  </component>
-  <component name="PyDocumentationSettings">
-    <option name="renderExternalDocumentation" value="true" />
   </component>
 </module>
