@@ -23,9 +23,13 @@ fps = int(video.get(cv2.CAP_PROP_FPS))
 detection_width = 854
 detection_height = 480
 
+# Factor for resizing bounding boxes
+width_factor = width / detection_width
+height_factor = height / detection_height
+
 # Set output video properties
-output_width = 854
-output_height = 480
+output_width = width
+output_height = height
 
 # Output path
 output_video_name = "output_" + video_name
@@ -46,11 +50,11 @@ while True:
     if not ret:
         break
 
-    frame_small = cv2.resize(frame, (output_width, output_height))
+    frame_small = cv2.resize(frame, (detection_width, detection_height))
 
     # Detect every 5th frame
     if frame_count % 7 == 0:
-        results = model.predict(frame_small, conf=0.59, classes=[0], verbose=False)
+        results = model.predict(frame_small, conf=0.59, classes=[0]) #, verbose=False)
         results = results[0].numpy()
 
         prev_bounding_boxes = np.array([])
@@ -60,11 +64,11 @@ while True:
 
     # Draw each box from prev_bounding_boxes
     for box in prev_bounding_boxes:
-        cv2.putText(frame_small, "Person " + str(round(box[4], 3)), (int(box[0]), int(box[1]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-        cv2.rectangle(frame_small, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0), 2)
+        cv2.putText(frame, "Person " + str(round(box[4], 3)), (int(box[0]*width_factor), int(box[1]*height_factor) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        cv2.rectangle(frame, (int(box[0]*width_factor), int(box[1]*height_factor)), (int(box[2]*width_factor), int(box[3]*height_factor)), (0, 255, 0), 2)
 
     # Write frame to output video
-    output_video.write(frame_small)
+    output_video.write(frame)
     frame_count += 1
 
 # Release resources
