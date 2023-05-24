@@ -57,10 +57,9 @@ while True:
     if not ret:
         break
 
-    frame_small = cv2.resize(frame, (detection_width, detection_height))
-
     # Detect every 5th frame
     if frame_count % 7 == 0:
+        frame_small = cv2.resize(frame, (detection_width, detection_height))
         results = model.predict(frame_small, conf=0.59, classes=[0]) #, verbose=False)
         results = results[0].numpy()
 
