@@ -6,6 +6,14 @@ import time
 import numpy as np
 from ultralytics import YOLO
 
+#
+# script sends frames to the display thread as soon as they are available.
+# buffering is done
+# the frame time calculation is done in the broadcast thread
+# the display thread lags if the processing time is more than the frame delay
+# video speed is preserved
+#
+
 class VideoBroadcastThread(threading.Thread):
     def __init__(self, video_path, buffer_size):
         threading.Thread.__init__(self)

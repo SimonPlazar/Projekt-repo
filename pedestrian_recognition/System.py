@@ -6,6 +6,14 @@ import time
 import numpy as np
 from ultralytics import YOLO
 
+#
+# script sends frames to the display thread as soon as they are available.
+# no buffering is done
+# the frame time calculation is done in the broadcast thread
+# fps is not preserved
+# video slowed down
+#
+
 class VideoBroadcastThread(threading.Thread):
     def __init__(self, video_path):
         threading.Thread.__init__(self)
@@ -75,6 +83,10 @@ class VideoDisplayThread(threading.Thread):
             if frame is not None:
                 # Display the frame
                 frame_count += 1
+
+                # simulate processing time
+                time.sleep(0.1)
+
                 cv2.imshow('Video Display', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
