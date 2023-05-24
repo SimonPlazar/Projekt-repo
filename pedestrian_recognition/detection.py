@@ -5,11 +5,15 @@ from ultralytics import YOLO
 from pytictoc import TicToc
 import math
 
+#
+# FROM FILE TO FILE DETECTION
+#
+
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
 # Imput path
-video_name = "video_1280x720.mp4"
+video_name = "meritev_1684078148_000.mp4"
 video_folder = "no_audio"
 video_path = os.path.join(video_folder, video_name)
 

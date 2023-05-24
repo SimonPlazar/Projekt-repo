@@ -6,6 +6,10 @@ import time
 import numpy as np
 from ultralytics import YOLO
 
+#
+# detekcija live streama
+#
+
 class VideoBroadcastThread(threading.Thread):
     def __init__(self, video_path):
         threading.Thread.__init__(self)
@@ -104,6 +108,7 @@ class VideoDisplayThread(threading.Thread):
                 # Display the frame
                 frame_count += 1
                 cv2.imshow('Video Display', frame)
+                #cv2.imshow('Video Display', cv2.resize(frame, (1280, 720)))
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
