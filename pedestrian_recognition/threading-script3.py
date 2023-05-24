@@ -6,6 +6,11 @@ import time
 import numpy as np
 from ultralytics import YOLO
 
+#
+# VERY SLOW WITH PROCESSING DELAY
+# DOES NOT STOP WHEN EXIT
+#
+
 class VideoBroadcastThread(threading.Thread):
     def __init__(self, video_path, buffer_size):
         threading.Thread.__init__(self)
@@ -97,7 +102,7 @@ def process_frame(frame):
     # Perform post-processing operations on the frame
     # Example: Apply filters, resize, object detection, etc.
     processed_frame = frame  # Placeholder, replace with actual processing code
-    time.sleep(0.01)  # Simulate processing time
+    time.sleep(0.1)  # Simulate processing time
     return processed_frame
 
 # Load YOLOv8 model
