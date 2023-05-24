@@ -7,11 +7,12 @@ import numpy as np
 from ultralytics import YOLO
 
 class VideoBroadcastThread(threading.Thread):
-    def __init__(self, video_path):
+    def __init__(self, video_path, buffer_size):
         threading.Thread.__init__(self)
         self.video_path = video_path
-        self.frame_available = threading.Event()
-        self.frame = None
+        self.buffer_size = buffer_size
+        self.frame_buffers = [None, None]
+        self.current_buffer = 0
         self.stopped = False
         self.width = None
         self.height = None
@@ -34,10 +35,14 @@ class VideoBroadcastThread(threading.Thread):
             if not ret:
                 break
 
-            # Set the frame in shared variable
-            self.frame = frame
-            self.frame_available.set()
-            self.frame_available.clear()
+            # Add frame to the current buffer
+            self.frame_buffers[self.current_buffer] = frame
+
+            # Switch to the other buffer if it's not None
+            self.current_buffer = 1 - self.current_buffer
+            if self.frame_buffers[self.current_buffer] is not None:
+                # Wait for the receiving thread to consume frames
+                time.sleep(frame_delay)
 
             elapsed_time = time.time() - start_time
             delay = max(0, frame_delay - elapsed_time)
@@ -47,7 +52,7 @@ class VideoBroadcastThread(threading.Thread):
         cap.release()
 
         # Signal the end of the video
-        self.frame_available.set()
+        self.stopped = True
 
     def stop(self):
         self.stopped = True
@@ -65,21 +70,24 @@ class VideoDisplayThread(threading.Thread):
         frame_count = 0
 
         while not self.stopped:
-            # Wait for a frame to be available
-            self.broadcast_thread.frame_available.wait()
-
-            # Get the frame from the broadcast thread
-            frame = self.broadcast_thread.frame
-
-            # Process the frame
+            # Check if the current buffer has a frame available
+            frame = self.broadcast_thread.frame_buffers[self.broadcast_thread.current_buffer]
             if frame is not None:
                 # Display the frame
                 frame_count += 1
+
+                # Simulate processing time
+                time.sleep(0.1)
+
                 cv2.imshow('Video Display', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
+
+                # Set the frame in the current buffer to None
+                self.broadcast_thread.frame_buffers[self.broadcast_thread.current_buffer] = None
             else:
-                break
+                # If the current buffer is empty, wait for a frame to be available
+                time.sleep(0.001)
 
         # Close windows
         cv2.destroyAllWindows()
@@ -103,12 +111,13 @@ if __name__ == '__main__':
     detection_width = 854
     detection_height = 480
 
-    # Create and start the threads
-    broadcast_thread = VideoBroadcastThread(video_path)
+    # Set buffer size and create and start the threads
+    buffer_size = 10  # Adjust the buffer size as per your requirements
+    broadcast_thread = VideoBroadcastThread(video_path, buffer_size)
     display_thread = VideoDisplayThread(broadcast_thread)
 
     broadcast_thread.start()
-    time.sleep(0.1) # Wait for the broadcast thread to start and initialize the video properties
+    time.sleep(0.5)  # Wait for the broadcast thread to start and initialize the video properties
     display_thread.start()
 
     # Wait for the display thread to finish or the video to end

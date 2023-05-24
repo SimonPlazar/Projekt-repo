@@ -7,11 +7,11 @@ import numpy as np
 from ultralytics import YOLO
 
 class VideoBroadcastThread(threading.Thread):
-    def __init__(self, video_path):
+    def __init__(self, video_path, buffer_size):
         threading.Thread.__init__(self)
         self.video_path = video_path
-        self.frame_available = threading.Event()
-        self.frame = None
+        self.buffer_size = buffer_size
+        self.frame_buffers = []
         self.stopped = False
         self.width = None
         self.height = None
@@ -34,10 +34,12 @@ class VideoBroadcastThread(threading.Thread):
             if not ret:
                 break
 
-            # Set the frame in shared variable
-            self.frame = frame
-            self.frame_available.set()
-            self.frame_available.clear()
+            # Add frame to the buffer
+            self.frame_buffers.append(frame)
+
+            # Wait for the buffer to have available space
+            while len(self.frame_buffers) >= self.buffer_size:
+                time.sleep(0.001)
 
             elapsed_time = time.time() - start_time
             delay = max(0, frame_delay - elapsed_time)
@@ -47,7 +49,7 @@ class VideoBroadcastThread(threading.Thread):
         cap.release()
 
         # Signal the end of the video
-        self.frame_available.set()
+        self.stopped = True
 
     def stop(self):
         self.stopped = True
@@ -65,21 +67,22 @@ class VideoDisplayThread(threading.Thread):
         frame_count = 0
 
         while not self.stopped:
-            # Wait for a frame to be available
-            self.broadcast_thread.frame_available.wait()
+            # Check if the buffer has a frame available
+            if len(self.broadcast_thread.frame_buffers) > 0:
+                # Get the frame from the buffer
+                frame = self.broadcast_thread.frame_buffers.pop(0)
 
-            # Get the frame from the broadcast thread
-            frame = self.broadcast_thread.frame
+                # Process the frame (e.g., post-processing)
+                processed_frame = process_frame(frame)
 
-            # Process the frame
-            if frame is not None:
                 # Display the frame
                 frame_count += 1
-                cv2.imshow('Video Display', frame)
+                cv2.imshow('Video Display', processed_frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
-                break
+                # If the buffer is empty, wait for a frame to be available
+                time.sleep(0.001)
 
         # Close windows
         cv2.destroyAllWindows()
@@ -89,6 +92,13 @@ class VideoDisplayThread(threading.Thread):
 
     def stop(self):
         self.stopped = True
+
+def process_frame(frame):
+    # Perform post-processing operations on the frame
+    # Example: Apply filters, resize, object detection, etc.
+    processed_frame = frame  # Placeholder, replace with actual processing code
+    time.sleep(0.01)  # Simulate processing time
+    return processed_frame
 
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
@@ -103,12 +113,13 @@ if __name__ == '__main__':
     detection_width = 854
     detection_height = 480
 
-    # Create and start the threads
-    broadcast_thread = VideoBroadcastThread(video_path)
+    # Set buffer size and create and start the threads
+    buffer_size = 10  # Adjust the buffer size as per your requirements
+    broadcast_thread = VideoBroadcastThread(video_path, buffer_size)
     display_thread = VideoDisplayThread(broadcast_thread)
 
     broadcast_thread.start()
-    time.sleep(0.1) # Wait for the broadcast thread to start and initialize the video properties
+    time.sleep(0.1)  # Wait for the broadcast thread to start and initialize the video properties
     display_thread.start()
 
     # Wait for the display thread to finish or the video to end
