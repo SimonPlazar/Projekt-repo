@@ -24,7 +24,6 @@ class VideoBroadcastThread(threading.Thread):
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.fps = int(cap.get(cv2.CAP_PROP_FPS))
-
         frame_delay = 1 / self.fps
 
         while cap.isOpened() and not self.stopped:
