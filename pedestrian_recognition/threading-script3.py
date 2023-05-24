@@ -8,6 +8,7 @@ from ultralytics import YOLO
 
 #
 # VERY SLOW WITH PROCESSING DELAY
+# DOES NOT STOP WHEN VIDEO ENDS
 #
 
 class VideoBroadcastThread(threading.Thread):
