@@ -1,4 +1,6 @@
 import math
+import sys
+
 import cv2
 import threading
 import os
@@ -6,6 +8,7 @@ from datetime import datetime
 import numpy as np
 import time
 from ultralytics import YOLO
+import getopt
 
 #
 # script sends frames to the display thread as soon as they are available.
@@ -14,7 +17,6 @@ from ultralytics import YOLO
 # the display thread lags if the processing time is more than the frame delay
 # video speed is preserved
 #
-
 
 # Definirajte globalno spremenljivko za shranjevanje izbrane funkcije predprocesiranja
 selected_preprocessing = None
@@ -145,7 +147,8 @@ class VideoDisplayThread(threading.Thread):
                     # Uporabite izbrano funkcijo predprocesiranja
                     frame = process_frame(frame)
                 time_elapsed = datetime.now() - start_time
-                cv2.putText(frame, 'Time elapsed {}'.format(time_elapsed.microseconds), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+
+                cv2.putText(frame, 'Time elapsed {}'.format(time_elapsed), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
                 cv2.putText(frame, 'Frame delay ' + str(int(time_elapsed.microseconds - 1 / broadcast_thread.fps)), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
                 cv2.imshow('Video Display', frame)
@@ -269,24 +272,31 @@ model = YOLO("yolov8n.pt")
 # Main program
 if __name__ == '__main__':
 
-    # pass argument to the program if video input or camera input
+    argv = sys.argv[1:]
 
+    # pass argument to the program if video input or camera input
+    opts, args = getopt.getopt(argv, "hi:c", ["imput="])
 
     folder_path = 'no_audio'
     video_name = 'video_854x480.mp4'
     video_path = os.path.join(folder_path, video_name)
     # video_path = 0
 
-    # Set detection video properties
-    detection_width = 854
-    detection_height = 480
+    for opt, arg in opts:
+        if opt == '-h':
+            print('predvajalnik.py [-i <video_name>][-c]')
+            sys.exit()
+        elif opt in ("-i"):
+            video_name = arg
+            video_path = os.path.join('no_audio', video_name)
+        elif opt in ("-c"):
+            video_path = 0
 
     # Set buffer size and create and start the threads
     buffer_size = 50  # Adjust the buffer size as per your requirements
     broadcast_thread = VideoBroadcastThread(video_path, buffer_size)
     display_thread = VideoDisplayThread(broadcast_thread)
     preprocessing_thread = PreprocessingThread()
-
 
     broadcast_thread.start()
     time.sleep(0.5)  # Wait for the broadcast thread to start and initialize the video properties
