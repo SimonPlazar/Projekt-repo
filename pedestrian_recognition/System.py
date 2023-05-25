@@ -7,7 +7,11 @@ import numpy as np
 from ultralytics import YOLO
 
 #
-# detekcija live streama
+# script sends frames to the display thread as soon as they are available.
+# no buffering is done
+# the frame time calculation is done in the broadcast thread
+# fps is not preserved
+# video slowed down
 #
 
 class VideoBroadcastThread(threading.Thread):
@@ -77,38 +81,13 @@ class VideoDisplayThread(threading.Thread):
 
             # Process the frame
             if frame is not None:
-                if frame_count % 2 == 0:
-                    # Process the frame
-                    frame_small = cv2.resize(frame, (detection_width, detection_height))
-                    results = model.predict(frame_small, conf=0.59, classes=[0], verbose=False)
-                    results = results[0].numpy()
-
-                    prev_bounding_boxes = np.array([])
-                    if len(results) != 0:
-                        # Concatenate all boxes data
-                        prev_bounding_boxes = np.concatenate([param.boxes.data for param in results])
-                else:
-                    time.sleep(0.1)
-
-                for box in prev_bounding_boxes:
-                    box_size = math.dist((box[0], box[1]), (box[2], box[3]))
-                    cv2.putText(frame, "Person " + str(round(box[4], 3)),
-                                (int(box[0] * width_factor), int(box[1] * height_factor) - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                    if (box_size > 180):
-                        cv2.rectangle(frame, (int(box[0] * width_factor), int(box[1] * height_factor)),
-                                      (int(box[2] * width_factor), int(box[3] * height_factor)), (0, 0, 255), 2)
-                    elif (box_size > 100):
-                        cv2.rectangle(frame, (int(box[0] * width_factor), int(box[1] * height_factor)),
-                                      (int(box[2] * width_factor), int(box[3] * height_factor)), (0, 165, 255), 2)
-                    else:
-                        cv2.rectangle(frame, (int(box[0] * width_factor), int(box[1] * height_factor)),
-                                      (int(box[2] * width_factor), int(box[3] * height_factor)), (0, 255, 0), 2)
-
                 # Display the frame
                 frame_count += 1
+
+                # simulate processing time
+                time.sleep(0.1)
+
                 cv2.imshow('Video Display', frame)
-                #cv2.imshow('Video Display', cv2.resize(frame, (1280, 720)))
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             else:
