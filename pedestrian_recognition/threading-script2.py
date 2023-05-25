@@ -1,11 +1,10 @@
 import math
-import random
-
 import cv2
 import threading
 import os
-import time
+from datetime import datetime
 import numpy as np
+import time
 from ultralytics import YOLO
 
 #
@@ -61,10 +60,11 @@ class PreprocessingThread(threading.Thread):
             elif len(array) == 1:
                 selected_preprocessing = array[0]
             else:
-                print("Neveljaven vhod. Prosimo, poskusite znova.")
+                selected_preprocessing, opt1, opt2, opt3, opt4 = None, None, None, None, None
 
     def stop(self):
         self.stopped = True
+
 
 
 class VideoBroadcastThread(threading.Thread):
@@ -81,7 +81,8 @@ class VideoBroadcastThread(threading.Thread):
 
     def run(self):
         # Open video capture
-        cap = cv2.VideoCapture(self.video_path)
+        # cap = cv2.VideoCapture(self.video_path)
+        cap = cv2.VideoCapture(video_path)
 
         self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -128,8 +129,8 @@ class VideoDisplayThread(threading.Thread):
 
     def run(self):
         # Factor for resizing bounding boxes
-        width_factor = self.broadcast_thread.width / detection_width
-        height_factor = self.broadcast_thread.height / detection_height
+        # width_factor = self.broadcast_thread.width / detection_width
+        # height_factor = self.broadcast_thread.height / detection_height
         frame_count = 0
 
         while not self.stopped:
@@ -139,9 +140,13 @@ class VideoDisplayThread(threading.Thread):
                 # Display the frame
                 frame_count += 1
 
+                start_time = datetime.now()
                 if selected_preprocessing is not None:
                     # Uporabite izbrano funkcijo predprocesiranja
                     frame = process_frame(frame)
+                time_elapsed = datetime.now() - start_time
+                cv2.putText(frame, 'Time elapsed {}'.format(time_elapsed.microseconds), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                cv2.putText(frame, 'Frame delay ' + str(int(time_elapsed.microseconds - 1 / broadcast_thread.fps)), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
                 cv2.imshow('Video Display', frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -182,15 +187,21 @@ def process_frame(frame):
         kernel_size = (int(opt1), int(opt2))
         return cv2.subtract(frame, cv2.blur(frame, kernel_size))
     elif selected_preprocessing == "low-pass":
-        kernel_size = int(opt1)
+        kernel_size = (int(opt1), int(opt2))
         return cv2.blur(frame, kernel_size)
-    elif selected_preprocessing == "frequency_shift":
-        shift = (int(opt1), int(opt2))
-        return shift_in_frequency_domain(frame, shift)
+    # elif selected_preprocessing == "frequency_shift":
+    #     shift = (int(opt1), int(opt2))
+    #     return shift_in_frequency_domain(frame, shift)
     elif selected_preprocessing == "rotate_clockwise":
         return cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     elif selected_preprocessing == "rotate_counter_clockwise":
         return cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    elif selected_preprocessing == "flip_horizontally":
+        return cv2.flip(frame, 1)
+    elif selected_preprocessing == "flip_vertically":
+        return cv2.flip(frame, 0)
+    elif selected_preprocessing == "detection":
+        return detect(frame, int(opt1), int(opt2))
     else:
         # Neznani ID procesa, vrnemo nespremenjen frejm
         return frame
@@ -226,22 +237,52 @@ def shift_in_frequency_domain(frame, shift):
 
     return shifted_frame
 
+def detect(frame, process_width, process_height):
+    width_factor = frame.shape[1] / process_width
+    height_factor = frame.shape[0] / process_height
+
+    frame_small = cv2.resize(frame, (process_width, process_height))
+    results = model.predict(frame_small, conf=0.59, classes=[0], verbose=False)
+
+    prev_bounding_boxes = np.array([])
+    if len(results[0].numpy()) != 0:
+        # Concatenate all boxes data
+        prev_bounding_boxes = np.concatenate([param.boxes.data for param in results[0].numpy()])
+
+    # Draw each box from prev_bounding_boxes
+    for box in prev_bounding_boxes:
+        box_size = math.dist((box[0], box[1]), (box[2], box[3]))
+        cv2.putText(frame, "Person " + str(round(box[4], 3)), (int(box[0]*width_factor), int(box[1]*height_factor) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        if(box_size > 180):
+            cv2.rectangle(frame, (int(box[0]*width_factor), int(box[1]*height_factor)), (int(box[2]*width_factor), int(box[3]*height_factor)), (0, 0, 255), 2)
+        elif (box_size > 100):
+            cv2.rectangle(frame, (int(box[0]*width_factor), int(box[1]*height_factor)), (int(box[2]*width_factor), int(box[3]*height_factor)), (0, 165, 255), 2)
+        else:
+            cv2.rectangle(frame, (int(box[0]*width_factor), int(box[1]*height_factor)), (int(box[2]*width_factor), int(box[3]*height_factor)), (0, 255, 0), 2)
+
+    return frame
+
 
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
 # Main program
 if __name__ == '__main__':
+
+    # pass argument to the program if video input or camera input
+
+
     folder_path = 'no_audio'
     video_name = 'video_854x480.mp4'
     video_path = os.path.join(folder_path, video_name)
+    # video_path = 0
 
     # Set detection video properties
     detection_width = 854
     detection_height = 480
 
     # Set buffer size and create and start the threads
-    buffer_size = 10  # Adjust the buffer size as per your requirements
+    buffer_size = 50  # Adjust the buffer size as per your requirements
     broadcast_thread = VideoBroadcastThread(video_path, buffer_size)
     display_thread = VideoDisplayThread(broadcast_thread)
     preprocessing_thread = PreprocessingThread()
@@ -254,7 +295,7 @@ if __name__ == '__main__':
 
     # Wait for the display thread to finish or the video to end
     while not display_thread.stopped and not broadcast_thread.stopped and not preprocessing_thread.stopped:
-        time.sleep(0.1)
+        time.sleep(0.01)
 
     # Stop the threads
     display_thread.stop()

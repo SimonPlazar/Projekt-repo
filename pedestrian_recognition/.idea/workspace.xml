@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f1fccd62-6697-45b8-b1ef-0d1ffe4ab05a" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/detection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/threading-script2.py" beforeDir="false" afterPath="$PROJECT_DIR$/threading-script2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/threading_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/threading_script.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +84,7 @@
       <workItem from="1684932027190" duration="11000" />
       <workItem from="1684932345650" duration="2520000" />
       <workItem from="1684938871678" duration="7669000" />
+      <workItem from="1684970659884" duration="3460000" />
     </task>
     <servers />
   </component>
@@ -100,9 +99,9 @@
     <SUITE FILE_PATH="coverage/pedestrian_recognition$detection_live.coverage" NAME="detection-live Coverage Results" MODIFIED="1684880852919" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pedestrian_recognition$System.coverage" NAME="System Coverage Results" MODIFIED="1684962065344" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pedestrian_recognition$threading.coverage" NAME="threading Coverage Results" MODIFIED="1684881339653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pedestrian_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1684952639828" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pedestrian_recognition$main.coverage" NAME="main Coverage Results" MODIFIED="1684970697275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pedestrian_recognition$threading_script4.coverage" NAME="threading_script4 Coverage Results" MODIFIED="1684945497624" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/pedestrian_recognition$threading_script2.coverage" NAME="threading-script2 Coverage Results" MODIFIED="1684962257305" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/pedestrian_recognition$threading_script2.coverage" NAME="threading-script2 Coverage Results" MODIFIED="1684974063180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/pedestrian_recognition$detection.coverage" NAME="detection Coverage Results" MODIFIED="1684961564674" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
