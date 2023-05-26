@@ -13,7 +13,7 @@ def thread_produce():
     red = redis.Redis()
 
     # Video
-    folder_path = 'no_audio'
+    folder_path = '../no_audio'
     video_name = 'video_1280x720.mp4'
     video_path = os.path.join(folder_path, video_name)
     vc = cv2.VideoCapture(video_path)

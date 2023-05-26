@@ -45,6 +45,9 @@ def thread_do_work():
 
                     # Detection
                     results = model(frame)
+
+
+
                     names = results.names
                     preds = results.xyxy[0].numpy()
                     preds_list = []
