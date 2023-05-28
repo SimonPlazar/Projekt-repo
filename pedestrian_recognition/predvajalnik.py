@@ -1,6 +1,5 @@
 import math
 import sys
-
 import cv2
 import threading
 import os
@@ -44,6 +43,7 @@ class PreprocessingThread(threading.Thread):
             user_input = input("Vnesite besedo za določanje funkcije predprocesiranja (ali 'q' za izhod): ")
             # Preverite, ali uporabnik želi izhod
             if user_input == "q":
+                self.stopped = True
                 break
 
             # Preverite uporabnikov vhod in nastavite izbrano funkcijo predprocesiranja
@@ -70,24 +70,43 @@ class PreprocessingThread(threading.Thread):
 
 
 class VideoBroadcastThread(threading.Thread):
-    def __init__(self, video_path, buffer_size):
+    def __init__(self, video_path, buffer_size, x, y):
         threading.Thread.__init__(self)
         self.video_path = video_path
         self.buffer_size = buffer_size
         self.frame_buffers = [None, None]
         self.current_buffer = 0
         self.stopped = False
-        self.width = None
-        self.height = None
+        self.width = x
+        self.height = y
         self.fps = None
+        self.resize = True
 
     def run(self):
         # Open video capture
         # cap = cv2.VideoCapture(self.video_path)
         cap = cv2.VideoCapture(video_path)
 
-        self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        resize_x, resize_y = True, True
+        sizeX, sizeY = cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+
+        if self.width is None:
+            resize_x = False
+            self.width = sizeX
+        else:
+            if self.width == sizeX:
+                resize_x = False
+
+        if self.height is None:
+            resize_y = False
+            self.height = sizeY
+        else:
+            if self.height == sizeY:
+                resize_y = False
+
+        if not resize_x and not resize_y:
+            self.resize = False
+
         self.fps = int(cap.get(cv2.CAP_PROP_FPS))
         frame_delay = 1 / self.fps
 
@@ -100,14 +119,18 @@ class VideoBroadcastThread(threading.Thread):
                 if not ret:
                     break
 
+                if self.resize:
+                    frame = cv2.resize(frame, (self.width, self.height))
+
                 # Add frame to the current buffer
                 self.frame_buffers[self.current_buffer] = frame
 
                 # Switch to the other buffer if it's not None
                 self.current_buffer = 1 - self.current_buffer
-                if self.frame_buffers[self.current_buffer] is not None:
-                    # Wait for the receiving thread to consume frames
-                    time.sleep(frame_delay)
+
+                #if self.frame_buffers[self.current_buffer] is not None:
+                #    # Wait for the receiving thread to consume frames
+                #     time.sleep(frame_delay)
 
                 elapsed_time = time.time() - start_time
                 delay = max(0, frame_delay - elapsed_time)
@@ -275,12 +298,14 @@ if __name__ == '__main__':
     argv = sys.argv[1:]
 
     # pass argument to the program if video input or camera input
-    opts, args = getopt.getopt(argv, "hi:c", ["imput="])
+    opts, args = getopt.getopt(argv, "hi:co:", ["input=", "output="])
 
     folder_path = 'no_audio'
     video_name = 'video_854x480.mp4'
     video_path = os.path.join(folder_path, video_name)
     # video_path = 0
+
+    x, y = None, None
 
     for opt, arg in opts:
         if opt == '-h':
@@ -291,10 +316,21 @@ if __name__ == '__main__':
             video_path = os.path.join('no_audio', video_name)
         elif opt in ("-c"):
             video_path = 0
+        elif opt in ("-o"):
+            rez = arg
+            x, y = rez.split('x')
 
-    # Set buffer size and create and start the threads
-    buffer_size = 50  # Adjust the buffer size as per your requirements
-    broadcast_thread = VideoBroadcastThread(video_path, buffer_size)
+    buffer_size = 50
+
+    if x is not None and y is None:
+        broadcast_thread = VideoBroadcastThread(video_path, buffer_size, int(x), None)
+    elif x is None and y is not None:
+        broadcast_thread = VideoBroadcastThread(video_path, buffer_size, None, int(y))
+    elif x is not None and y is not None:
+        broadcast_thread = VideoBroadcastThread(video_path, buffer_size, int(x), int(y))
+    else:
+        broadcast_thread = VideoBroadcastThread(video_path, buffer_size, None, None)
+        
     display_thread = VideoDisplayThread(broadcast_thread)
     preprocessing_thread = PreprocessingThread()
 
