@@ -8,7 +8,7 @@ from ultralytics import YOLO
 
 #
 # prva iteracija skripte s threadingom
-# detekcija live streama ki je lahko ali video ali kamera
+# detekcija live streama ki je lahko video ali kamera
 # posnetek ne zakasnuje ampak samo zmanjša fps z daljšim procesiranjem
 #
 

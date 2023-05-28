@@ -5,13 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1fccd62-6697-45b8-b1ef-0d1ffe4ab05a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/con_pro_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sistem/con_pro_detection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/con_visualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sistem/con_visualization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/detection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pro_video.py" beforeDir="false" afterPath="$PROJECT_DIR$/Sistem/pro_video.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/threading-script3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/con_pro_detection.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/con_visualization.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pro_video.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/threading_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/threading_script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/threading_script4.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -37,20 +34,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "Nastavitve__sistema",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\simon\Desktop\Projekt-repo\pedestrian_recognition\Sistem" />
@@ -104,6 +101,7 @@
       <workItem from="1685049139935" duration="4805000" />
       <workItem from="1685094552347" duration="78000" />
       <workItem from="1685096594759" duration="38000" />
+      <workItem from="1685305681341" duration="95000" />
     </task>
     <servers />
   </component>
