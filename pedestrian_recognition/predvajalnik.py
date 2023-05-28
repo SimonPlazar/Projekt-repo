@@ -298,7 +298,7 @@ if __name__ == '__main__':
     argv = sys.argv[1:]
 
     # pass argument to the program if video input or camera input
-    opts, args = getopt.getopt(argv, "hi:co:", ["imput=", "output="])
+    opts, args = getopt.getopt(argv, "hi:co:", ["input=", "output="])
 
     folder_path = 'no_audio'
     video_name = 'video_854x480.mp4'
@@ -320,8 +320,7 @@ if __name__ == '__main__':
             rez = arg
             x, y = rez.split('x')
 
-    # Set buffer size and create and start the threads
-    buffer_size = 50  # Adjust the buffer size as per your requirements
+    buffer_size = 50
 
     if x is not None and y is None:
         broadcast_thread = VideoBroadcastThread(video_path, buffer_size, int(x), None)
