@@ -7,7 +7,9 @@ import numpy as np
 from ultralytics import YOLO
 
 #
-# detekcija live streama
+# prva iteracija skripte s threadingom
+# detekcija live streama ki je lahko ali video ali kamera
+# posnetek ne zakasnuje ampak samo zmanjša fps z daljšim procesiranjem
 #
 
 class VideoBroadcastThread(threading.Thread):
