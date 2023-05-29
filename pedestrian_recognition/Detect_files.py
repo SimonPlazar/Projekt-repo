@@ -1,9 +1,7 @@
-
 import cv2
 from ultralytics import YOLO
 from pytictoc import TicToc
 import math
-
 
 def Detect(video_path, output_video_path):
 
