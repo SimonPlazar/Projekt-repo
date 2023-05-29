@@ -5,6 +5,13 @@ from ultralytics import YOLO
 from pytictoc import TicToc
 import math
 
+#
+# Detekcija na live streamu kamere
+# Posnetek ne zakasnuje zaradi drugačne
+# funkcionalnosti kamere v primerjavi s branjem posnetka
+#
+
+
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
