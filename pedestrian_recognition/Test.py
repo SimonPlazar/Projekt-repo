@@ -1,7 +1,5 @@
 import Detect_files
 import os
-import cv2
-
 
 video_folder = os.path.join("no_audio", "Testiranje")
 for video_name in os.listdir(video_folder):
