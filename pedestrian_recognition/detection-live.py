@@ -11,7 +11,6 @@ import math
 # funkcionalnosti kamere v primerjavi s branjem posnetka
 #
 
-
 # Load YOLOv8 model
 model = YOLO("yolov8n.pt")
 
