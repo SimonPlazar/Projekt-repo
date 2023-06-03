@@ -194,22 +194,35 @@ class VideoDisplayThread(threading.Thread):
                     frame_temp = np.frombuffer(red.get("frame:latest"), dtype=np.uint8)
 
                     # Convert image
-                    if (np.shape(frame_temp)[0] == 1229760):
+                    if (frame_temp is not None):
                         frame = frame_temp.reshape((480, 854, 3))
 
                         # Detection
-                        results = model(frame)
+                        if frame is not None:
+                            # Display the frame
+                            frame_count += 1
 
-                        names = results.names
-                        preds = results.xyxy[0].numpy()
-                        preds_list = []
-                        for pred in preds:
-                            if names[int(pred[-1])] == "person":
-                                preds_list.append(",".join(str(v) for v in pred[0:4]))
+                            start_time = datetime.now()
 
+                            # Uporabite izbrano funkcijo predprocesiranja
+                            frame = detect(frame, 854, 480)
 
+                            time_elapsed = datetime.now() - start_time
 
-                            # Prometheus metrics
+                            cv2.putText(frame, 'Time elapsed {}'.format(time_elapsed), (10, 30),
+                                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                            cv2.putText(frame,
+                                        'Frame delay ' + str(int(time_elapsed.microseconds - 1 / broadcast_thread.fps)),
+                                        (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+
+                            cv2.imshow('Video Display', frame)
+                            if cv2.waitKey(1) & 0xFF == ord('q'):
+                                break
+
+                            # Set the frame in the current buffer to None
+                            self.broadcast_thread.frame_buffers[self.broadcast_thread.current_buffer] = None
+
+                        # Prometheus metrics
                         counter_neuralnetwork.inc(1)
 
                 time.sleep(1)
@@ -217,31 +230,6 @@ class VideoDisplayThread(threading.Thread):
                 # To beginning
                 consumer.seek_to_beginning()
                 consumer.commit()
-
-                    # Check if the current buffer has a frame available
-            frame = self.broadcast_thread.frame_buffers[self.broadcast_thread.current_buffer]
-            if frame is not None:
-                # Display the frame
-                frame_count += 1
-
-                start_time = datetime.now()
-                if selected_preprocessing is not None:
-                    # Uporabite izbrano funkcijo predprocesiranja
-                    frame = process_frame(frame)
-                time_elapsed = datetime.now() - start_time
-
-                cv2.putText(frame, 'Time elapsed {}'.format(time_elapsed), (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-                cv2.putText(frame, 'Frame delay ' + str(int(time_elapsed.microseconds - 1 / broadcast_thread.fps)), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
-
-                cv2.imshow('Video Display', frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-
-                # Set the frame in the current buffer to None
-                self.broadcast_thread.frame_buffers[self.broadcast_thread.current_buffer] = None
-            else:
-                # If the current buffer is empty, wait for a frame to be available
-                time.sleep(0.001)
 
         # Close windows
         cv2.destroyAllWindows()
@@ -251,76 +239,6 @@ class VideoDisplayThread(threading.Thread):
 
     def stop(self):
         self.stopped = True
-
-def process_frame(frame):
-    global selected_preprocessing
-    global opt1
-    global opt2
-    global opt3
-    global opt4
-
-    if selected_preprocessing == "add_noise":
-        return cv2.add(frame, np.random.normal(0, 1, frame.shape).astype(np.uint8))
-    elif selected_preprocessing == "resize":
-        output_size = (int(opt1), int(opt2)) # (9, 9)
-        kernel_size = (3, 3)
-        sigma = 1.5
-        return cv2.resize(cv2.GaussianBlur(frame, kernel_size, sigma), output_size, interpolation=cv2.INTER_AREA)
-    elif selected_preprocessing == "add_background":
-        return add_background(frame, opt1)
-    elif selected_preprocessing == "high-pass":
-        kernel_size = (int(opt1), int(opt2))
-        return cv2.subtract(frame, cv2.blur(frame, kernel_size))
-    elif selected_preprocessing == "low-pass":
-        kernel_size = (int(opt1), int(opt2))
-        return cv2.blur(frame, kernel_size)
-    # elif selected_preprocessing == "frequency_shift":
-    #     shift = (int(opt1), int(opt2))
-    #     return shift_in_frequency_domain(frame, shift)
-    elif selected_preprocessing == "rotate_clockwise":
-        return cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-    elif selected_preprocessing == "rotate_counter_clockwise":
-        return cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-    elif selected_preprocessing == "flip_horizontally":
-        return cv2.flip(frame, 1)
-    elif selected_preprocessing == "flip_vertically":
-        return cv2.flip(frame, 0)
-    elif selected_preprocessing == "detection":
-        return detect(frame, int(opt1), int(opt2))
-    else:
-        # Neznani ID procesa, vrnemo nespremenjen frejm
-        return frame
-
-def add_background(frame, background_image_path):
-    # Implementacija dodajanja posnetkov ozadja
-    # Tukaj je primer, kako lahko dodate posnetek ozadja na frejm:
-    background_image = cv2.imread(background_image_path)
-    background_image = cv2.resize(background_image, (frame.shape[1], frame.shape[0]))
-    background_frame = cv2.addWeighted(frame, 0.8, background_image, 0.2, 0)
-    return background_frame
-
-def shift_in_frequency_domain(frame, shift):
-    # Preveri, če je število vrstic in stolpcev sodo število
-    rows, cols, _ = frame.shape
-    if rows % 2 != 0 or cols % 2 != 0:
-        raise ValueError("The number of rows and columns of the frame must be even.")
-
-    # Pretvorba v sivinsko sliko
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Izvedba diskretne Fourierjeve transformacije (DFT)
-    dft = np.fft.fft2(gray_frame)
-
-    # Premik frekvenc v frekvenčnem prostoru
-    shifted_dft = np.fft.fftshift(dft)
-
-    # Izvedba inverzne DFT
-    shifted_frame = np.fft.ifft2(shifted_dft)
-
-    # Pretvorba nazaj v barvni prostor
-    shifted_frame = cv2.cvtColor(np.real(shifted_frame), cv2.COLOR_GRAY2BGR)
-
-    return shifted_frame
 
 def detect(frame, process_width, process_height):
     width_factor = frame.shape[1] / process_width
