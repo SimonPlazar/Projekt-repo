@@ -1,4 +1,7 @@
+import getopt
+import json
 import os
+import sys
 
 import numpy as np
 import cv2
@@ -8,16 +11,24 @@ import signal
 import time
 import kafka
 
-def thread_produce():
+def thread_produce(video_path):
     # Redis
     red = redis.Redis()
 
     # Video
-    folder_path = '../no_audio'
-    video_name = 'video_1280x720.mp4'
-    video_path = os.path.join(folder_path, video_name)
     vc = cv2.VideoCapture(video_path)
     fps = int(vc.get(cv2.CAP_PROP_FPS))
+    width = int(vc.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(vc.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Create the message header as a dictionary
+    message_header = {
+        'video_width': width,
+        'video_height': height
+    }
+
+    # Serialize the message header to JSON
+    header_json = json.dumps(message_header)
 
     # Kafka
     topic = 'frame_noticifation'
@@ -35,7 +46,9 @@ def thread_produce():
         red.set("frame:latest", np.array(frame).tobytes())
 
         # Send notification about new frame over Kafka
-        future = producer.send(topic, b"new_frame", timestamp_ms=round(time.time()*1000))
+        future = producer.send(topic, b"new_frame",
+                               headers=[('video_info', header_json.encode('utf-8'))],
+                               timestamp_ms=round(time.time()*1000))
 
         # Wait until message is delivered to Kafka
         try:
@@ -63,10 +76,32 @@ def sigint_handler(signum, frame):
 
 signal.signal(signal.SIGINT, sigint_handler)
 
+folder_path = 'no_audio'
+video_name = 'video_854x480.mp4'
+
 event = threading.Event()
-thread = threading.Thread(target=lambda: thread_produce())
+thread = threading.Thread(target=lambda: thread_produce(video_path))
 
 if __name__ == "__main__":
+    global video_path
+
+    video_path = os.path.join(folder_path, video_name)
+
+    argv = sys.argv[1:]
+
+    # pass argument to the program if video input or camera input
+    opts, args = getopt.getopt(argv, "hi:c", ["input="])
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print('predvajalnik.py [-i <video_name>][-c]')
+            sys.exit()
+        elif opt in ("-i"):
+            video_name = arg
+            video_path = os.path.join('no_audio', video_name)
+        elif opt in ("-c"):
+            video_path = 0
+
     thread.start()
     input("Press CTRL+C or Enter to stop producing...")
     event.set()

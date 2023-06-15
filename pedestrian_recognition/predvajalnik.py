@@ -207,17 +207,12 @@ def process_frame(frame):
         kernel_size = (3, 3)
         sigma = 1.5
         return cv2.resize(cv2.GaussianBlur(frame, kernel_size, sigma), output_size, interpolation=cv2.INTER_AREA)
-    elif selected_preprocessing == "add_background":
-        return add_background(frame, opt1)
     elif selected_preprocessing == "high-pass":
         kernel_size = (int(opt1), int(opt2))
         return cv2.subtract(frame, cv2.blur(frame, kernel_size))
     elif selected_preprocessing == "low-pass":
         kernel_size = (int(opt1), int(opt2))
         return cv2.blur(frame, kernel_size)
-    # elif selected_preprocessing == "frequency_shift":
-    #     shift = (int(opt1), int(opt2))
-    #     return shift_in_frequency_domain(frame, shift)
     elif selected_preprocessing == "rotate_clockwise":
         return cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     elif selected_preprocessing == "rotate_counter_clockwise":
@@ -231,37 +226,6 @@ def process_frame(frame):
     else:
         # Neznani ID procesa, vrnemo nespremenjen frejm
         return frame
-
-def add_background(frame, background_image_path):
-    # Implementacija dodajanja posnetkov ozadja
-    # Tukaj je primer, kako lahko dodate posnetek ozadja na frejm:
-    background_image = cv2.imread(background_image_path)
-    background_image = cv2.resize(background_image, (frame.shape[1], frame.shape[0]))
-    background_frame = cv2.addWeighted(frame, 0.8, background_image, 0.2, 0)
-    return background_frame
-
-def shift_in_frequency_domain(frame, shift):
-    # Preveri, če je število vrstic in stolpcev sodo število
-    rows, cols, _ = frame.shape
-    if rows % 2 != 0 or cols % 2 != 0:
-        raise ValueError("The number of rows and columns of the frame must be even.")
-
-    # Pretvorba v sivinsko sliko
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # Izvedba diskretne Fourierjeve transformacije (DFT)
-    dft = np.fft.fft2(gray_frame)
-
-    # Premik frekvenc v frekvenčnem prostoru
-    shifted_dft = np.fft.fftshift(dft)
-
-    # Izvedba inverzne DFT
-    shifted_frame = np.fft.ifft2(shifted_dft)
-
-    # Pretvorba nazaj v barvni prostor
-    shifted_frame = cv2.cvtColor(np.real(shifted_frame), cv2.COLOR_GRAY2BGR)
-
-    return shifted_frame
 
 def detect(frame, process_width, process_height):
     width_factor = frame.shape[1] / process_width

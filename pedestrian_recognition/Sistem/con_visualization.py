@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 import cv2
 import threading
@@ -55,10 +57,8 @@ def thread_frames():
     consumer.subscribe([topic])
 
     while True:
-    
         # Read from Redis when message is received over Kafka
         for message in consumer:
-
             if message.value.decode("utf-8") == "new_frame":
                 frame_time = datetime.fromtimestamp(message.timestamp / 1000)
                 curr_time = datetime.now()
@@ -69,23 +69,28 @@ def thread_frames():
                     frame_temp = np.frombuffer(red.get("frame:latest"), dtype=np.uint8)
                     
                     # Convert image
-                    if (np.shape(frame_temp)[0] == 1229760):
-                        frame = frame_temp.reshape((480, 854, 3))
+                    if (np.shape(frame_temp)[0] is not None):
+                        # Extract the header value
+                        header = message.headers
+
+                        for header_key, header_value in header:
+                            if header_key == 'video_info':
+                                # Extract video width and height from the header
+                                header_json = header_value.decode('utf-8')
+                                header = json.loads(header_json)
+                                width = header['video_width']
+                                height = header['video_height']
+
+                        frame = frame_temp.reshape((height, width, 3))
 
                     # Plot detection
-                    if preds_time == 0 or (curr_time - preds_time).total_seconds() < 5:
+                    if preds_time == 0 or (curr_time - preds_time).total_seconds() < 10:
                         with lock:
                             for pred_str in preds_list:
-                                # column_start,row_start,column_end,row_end
-                                pred = [int(float(v)) for v in pred_str.split(",")]
-                                # Top
-                                cv2.line(frame, (pred[0], pred[1]), (pred[2], pred[1]), (0, 0, 255), 5)
-                                # Bottom
-                                cv2.line(frame, (pred[0], pred[3]), (pred[2], pred[3]), (0, 0, 255), 5)
-                                # Left
-                                cv2.line(frame, (pred[0], pred[1]), (pred[0], pred[3]), (0, 0, 255), 5)
-                                # Right
-                                cv2.line(frame, (pred[2], pred[1]), (pred[2], pred[3]), (0, 0, 255), 5)
+                                box = pred_str.split(",")
+                                cv2.rectangle(frame, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0), 2)
+
+                    frame = cv2.resize(frame, (1280, 720))
 
                     # Display image
                     cv2.imshow("frame", frame)
