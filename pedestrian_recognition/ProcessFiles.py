@@ -1,19 +1,18 @@
 import getopt
 import sys
-
 import DetectOnFile
 import os
 
 argv = sys.argv[1:]
 
 # pass argument to the program if video input or camera input
-opts, args = getopt.getopt(argv, "hd:", ["input=", "output="])
+opts, args = getopt.getopt(argv, "hd:")
 dir = None
 
 
 for opt, arg in opts:
     if opt == '-h':
-        print('predvajalnik.py [-i <video_name>][-c]')
+        print('ProcessFiles.py -d <directory>')
         sys.exit()
     elif opt == '-d':
         dir = arg
