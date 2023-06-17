@@ -52,19 +52,12 @@ if path is None:
     print('Pot ni podana!')
     sys.exit()
 
-input_folder = os.path.join("Data", path)
-output_folder = os.path.join("Output", path)
+input_video_path = os.path.join("Data", path)
+output_video_path = os.path.join("Output", path)
 
-if not os.path.exists(output_folder):
-    os.mkdir(output_folder)
+print(f"Working on {path}..")
 
-for video_name in os.listdir(input_folder):
-    print(f"Working on {video_name}..")
+DetectPicture(input_video_path, output_video_path)
 
-    input_video_path = os.path.join(input_folder, video_name)
-    output_video_path = os.path.join(output_folder, "output_" + video_name)
-
-    DetectPicture(input_video_path, output_video_path)
-
-    print("saved to " + output_video_path)
-    print(f"Done with {video_name}..\n")
+print("saved to " + output_video_path)
+print(f"Done with {path}..\n")
