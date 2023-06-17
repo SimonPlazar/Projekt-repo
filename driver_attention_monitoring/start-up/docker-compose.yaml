@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  # Start Redis
+  redis:
+    image: redis:7.0
+    container_name: redis 
+    ports:
+     - "6379:6379"
+  # Start Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+     - "9090:9090"
+    volumes:
+     - ./Prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
+  # Start Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+     - "3000:3000"
+  # Start Zookeeper
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+  process-exporter:
+    image: ncabatoff/process-exporter
+    command: --procfs /host/proc -config.path /process-exporter.yml #--procnames con_pro_detect.py #--namemapping "python, con_pro_detect.py"
+    volumes:
+      - /proc:/host/proc
+      - ./process-exporter.yml:/process-exporter.yml
+    container_name: process-exporter
+    ports:
+      - "9256:9256"
+  # Start Kafka
+  kafka:
+    build: ./Kafka/.
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL_SAME_HOST://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9093,EXTERNAL_SAME_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL_SAME_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      EXTRA_ARGS: -javaagent:/usr/app/jmx_prometheus.jar=8181:/usr/app/jmx_prometheus_config.yml
+      KAFKA_CREATE_TOPICS: "frame_noticifation:1:1,frame_detection:1:1"
+  
+
+
