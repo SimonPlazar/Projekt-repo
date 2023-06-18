@@ -264,10 +264,10 @@ if __name__ == '__main__':
     # pass argument to the program if video input or camera input
     opts, args = getopt.getopt(argv, "hi:co:", ["input=", "output="])
 
+    #default values
     folder_path = 'no_audio'
     video_name = 'video_854x480.mp4'
     video_path = os.path.join(folder_path, video_name)
-    # video_path = 0
 
     x, y = None, None
 
@@ -277,7 +277,7 @@ if __name__ == '__main__':
             sys.exit()
         elif opt in ("-i"):
             video_name = arg
-            video_path = os.path.join('no_audio', video_name)
+            video_path = os.path.join('Data', video_name)
         elif opt in ("-c"):
             video_path = 0
         elif opt in ("-o"):
